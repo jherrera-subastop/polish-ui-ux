@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VMC ahora · Valorizaciones</title>
+    <style>
+      :root { color: #24203a; font-family: Inter, Arial, sans-serif; background: #f4f2fa; }
+      * { box-sizing: border-box; } body { margin: 0; min-width: 320px; }
+      main { display: grid; grid-template-columns: 300px 300px; justify-content: center; align-items: start; gap: 24px; padding: 40px 16px; }
+      .card { overflow: hidden; border-radius: 18px; background: #fff; box-shadow: rgba(45,31,92,.11) 0 8px 28px; }
+      .feed { height: 560px; } .head { display: flex; justify-content: space-between; align-items: start; padding: 16px 18px 10px; border-bottom: 1px solid #e5dffc; }
+      h1,h2,h3,p { margin: 0; } h1 { color: #3b1782; font-size: 16px; } .sub { margin-top: 3px; color: #6b6880; font-size: 12px; } .live { color: #e46318; font-size: 11px; font-weight: 800; } .live::before { content: "•"; margin-right: 4px; }
+      #items { height: 490px; overflow: auto; padding: 10px 16px 20px; } .item { position: relative; display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 4px 0 18px; }
+      .item:not(:last-child)::before { content: ""; position: absolute; left: 14px; top: 34px; bottom: 0; width: 2px; background: #e5dffc; } .avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #3b1782; color: #fff; font-size: 9px; font-weight: 800; }
+      .who { display: flex; gap: 5px; align-items: center; color: #22154b; font-size: 12px; font-weight: 800; } .verified { color: #8460e5; } .when { color: #928da2; font-weight: 400; } .value { margin-top: 4px; font-size: 13px; line-height: 1.35; } .value b { color: #191c1c; } .cta { display: inline-block; margin-top: 8px; color: #3b1782; font-size: 11px; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+      .panel { display: grid; gap: 14px; padding: 18px; } h2 { color: #3b1782; font-size: 15px; } .label { display: grid; gap: 7px; color: #3b1782; font-size: 12px; font-weight: 800; } .chip { width: max-content; padding: 6px 11px; border: 1px solid #3b1782; border-radius: 999px; background: #efebfb; font-size: 13px; } button { justify-self: center; min-height: 40px; padding: 0 18px; border: 2px solid transparent; border-radius: 999px; color: #fff; background: linear-gradient(135deg,#ed8936 0%,#ed8936 40%,#8460e5 100%) padding-box,linear-gradient(135deg,#fff,#fbc47d 25%,#ae8eff 75%,#fff) border-box; box-shadow: rgba(237,137,54,.3) 0 2px 6px; font: 700 14px inherit; cursor: pointer; } button:hover { filter: brightness(1.05); transform: translateY(-1px); }
+      .rules { grid-column: 1 / -1; width: min(760px,100%); padding: 24px; } .rules h2 { font-size: 20px; } .rules > p { margin: 5px 0 20px; color: #6b6880; font-size: 13px; } .schedule { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .time { padding: 16px; border: 1px solid #e5dffc; border-radius: 14px; background: #faf9fe; } .time b { display: block; color: #3b1782; font-size: 14px; } .time span { display: block; margin-top: 4px; color: #6b6880; font-size: 12px; } .loop { margin-top: 10px!important; color: #191c1c!important; font-size: 14px!important; font-weight: 800; } .loop em { display: inline-block; margin-right: 7px; padding: 2px 6px; border-radius: 999px; background: #ede8fc; color: #3b1782; font-size: 10px; font-style: normal; letter-spacing: .04em; }
+      .rules h3 { margin: 24px 0 10px; color: #3b1782; font-size: 15px; } ol { display: grid; gap: 9px; margin: 0; padding-left: 20px; color: #4a4560; font-size: 13px; line-height: 1.45; } ol b { color: #191c1c; } table { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 12.5px; } th,td { padding: 8px 10px; border-bottom: 1px solid #eae5f8; text-align: left; } th { color: #3b1782; } .warning { margin: 10px 0 0; padding: 12px; border-radius: 10px; background: #fff7ed; color: #70410e; font-size: 12.5px; line-height: 1.45; }
+      @media(max-width:650px){ main{grid-template-columns: minmax(0,300px);}.rules{grid-column:1}.schedule{grid-template-columns:1fr;} }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="card feed" aria-label="VMC ahora"><header class="head"><div><h1>VMC ahora</h1><p class="sub">Actividad en tiempo real</p></div><span class="live">EN VIVO</span></header><div id="items"></div></section>
+      <aside class="card panel"><h2>Valorizaciones</h2><div class="label">Cómo se ve <span class="chip">Texto</span></div><div class="label">Cómo entra <span class="chip">Contador</span></div><button id="simulate">Simular valorización</button></aside>
+      <section class="card rules"><h2>Reglas de publicación AVT</h2><p>Horario y reglas del script · zona horaria: America/Lima</p><div class="schedule"><article class="time"><b>Horario diurno</b><span>08:00:00–23:59:59</span><span class="loop"><em>↻ LOOP</em>3 → 2 → 5 → 4 → 7 → 12 min</span><span>El loop inicia nuevamente a las 08:00.</span></article><article class="time"><b>Horario nocturno</b><span>00:00:00–07:59:59</span><span class="loop"><em>↻ LOOP</em>34 → 21 min</span><span>El loop inicia nuevamente a las 00:00.</span></article></div><h3>Qué debe decidir el script</h3><ol><li>Publicar solo valorizaciones activas de AVT con <b>año 2020 o superior</b>, marca, modelo, precio, moneda y fecha de cálculo válidos.</li><li>El feed mockea actividad: <b>“Un usuario acaba de valorizar un [marca + modelo + año]”</b>, usando el valor referencial de AVT.</li><li>La unicidad diaria es <b>marca + modelo</b>. El año no cuenta.</li><li>La lista de marca + modelo usados se limpia a las <b>00:00:00</b>.</li><li>Si el servicio se detiene, omite horarios vencidos y continúa con el siguiente horario futuro.</li></ol><h3>Grupos de modelos</h3><table><thead><tr><th>Grupo</th><th>Días permitidos</th></tr></thead><tbody><tr><td>A</td><td>Lunes y jueves</td></tr><tr><td>B</td><td>Martes y sábado</td></tr><tr><td>C</td><td>Miércoles y domingo</td></tr><tr><td>D</td><td>Viernes</td></tr></tbody></table><h3>Filtro de marcas</h3><ol start="6"><li>Se permiten marcas regulares. El máximo nivel premium permitido es <b>Lexus, Audi, BMW y Ford</b>.</li><li>Se excluyen: <b>Aston Martin, Bentley, Bugatti, Ferrari, Lamborghini, Maserati, Maybach, McLaren, Porsche y Rolls-Royce</b>.</li></ol><p class="warning">Las marcas premium no aprobadas expresamente quedan fuera hasta una nueva decisión de negocio.</p></section>
+    </main>
+    <script>
+      const valuations = [
+        ['Kia Sportage 2021','16,880'],['Toyota Corolla 2020','19,480'],['Volvo XC40 2021','31,240'],['Mazda CX-5 2020','21,760'],['BMW X1 2020','26,390'],['Audi Q3 2021','29,680'],['Hyundai Tucson 2021','19,240'],['Toyota Yaris 2021','11,860']
+      ];
+      const used = new Set(); const items = document.querySelector('#items');
+      function nextValuation(){ const available=valuations.filter(([model])=>!used.has(model)); const entry=(available.length?available:valuations)[Math.floor(Math.random()*(available.length||valuations.length))]; used.add(entry[0]); return entry; }
+      function add(){ const [model,price]=nextValuation(); const el=document.createElement('article'); el.className='item'; el.innerHTML=`<span class="avatar">VMC</span><div><p class="who">VMC <span class="verified">●</span><span class="when">Ahora</span></p><p class="value">Un usuario acaba de valorizar un <b>${model}</b> por <b>US$ ${price}</b>.</p><a class="cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div>`; items.prepend(el); while(items.children.length>8)items.lastElementChild.remove(); }
+      add(); add(); add(); document.querySelector('#simulate').addEventListener('click',add);
+    </script>
+  </body>
+</html>
