@@ -1,39 +1,1048 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VMC ahora · Valorizaciones</title>
-    <style>
-      :root { color: #24203a; font-family: Inter, Arial, sans-serif; background: #f4f2fa; }
-      * { box-sizing: border-box; } body { margin: 0; min-width: 320px; }
-      main { display: grid; grid-template-columns: 300px 300px; justify-content: center; align-items: start; gap: 24px; padding: 40px 16px; }
-      .card { overflow: hidden; border-radius: 18px; background: #fff; box-shadow: rgba(45,31,92,.11) 0 8px 28px; }
-      .feed { height: 560px; } .head { display: flex; justify-content: space-between; align-items: start; padding: 16px 18px 10px; border-bottom: 1px solid #e5dffc; }
-      h1,h2,h3,p { margin: 0; } h1 { color: #3b1782; font-size: 16px; } .sub { margin-top: 3px; color: #6b6880; font-size: 12px; } .live { color: #e46318; font-size: 11px; font-weight: 800; } .live::before { content: "•"; margin-right: 4px; }
-      #items { height: 490px; overflow: auto; padding: 10px 16px 20px; } .item { position: relative; display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 4px 0 18px; }
-      .item:not(:last-child)::before { content: ""; position: absolute; left: 14px; top: 34px; bottom: 0; width: 2px; background: #e5dffc; } .avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #3b1782; color: #fff; font-size: 9px; font-weight: 800; }
-      .who { display: flex; gap: 5px; align-items: center; color: #22154b; font-size: 12px; font-weight: 800; } .verified { color: #8460e5; } .when { color: #928da2; font-weight: 400; } .value { margin-top: 4px; font-size: 13px; line-height: 1.35; } .value b { color: #191c1c; } .cta { display: inline-block; margin-top: 8px; color: #3b1782; font-size: 11px; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
-      .panel { display: grid; gap: 14px; padding: 18px; } h2 { color: #3b1782; font-size: 15px; } .label { display: grid; gap: 7px; color: #3b1782; font-size: 12px; font-weight: 800; } .chip { width: max-content; padding: 6px 11px; border: 1px solid #3b1782; border-radius: 999px; background: #efebfb; font-size: 13px; } button { justify-self: center; min-height: 40px; padding: 0 18px; border: 2px solid transparent; border-radius: 999px; color: #fff; background: linear-gradient(135deg,#ed8936 0%,#ed8936 40%,#8460e5 100%) padding-box,linear-gradient(135deg,#fff,#fbc47d 25%,#ae8eff 75%,#fff) border-box; box-shadow: rgba(237,137,54,.3) 0 2px 6px; font: 700 14px inherit; cursor: pointer; } button:hover { filter: brightness(1.05); transform: translateY(-1px); }
-      .rules { grid-column: 1 / -1; width: min(760px,100%); padding: 24px; } .rules h2 { font-size: 20px; } .rules > p { margin: 5px 0 20px; color: #6b6880; font-size: 13px; } .schedule { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .time { padding: 16px; border: 1px solid #e5dffc; border-radius: 14px; background: #faf9fe; } .time b { display: block; color: #3b1782; font-size: 14px; } .time span { display: block; margin-top: 4px; color: #6b6880; font-size: 12px; } .loop { margin-top: 10px!important; color: #191c1c!important; font-size: 14px!important; font-weight: 800; } .loop em { display: inline-block; margin-right: 7px; padding: 2px 6px; border-radius: 999px; background: #ede8fc; color: #3b1782; font-size: 10px; font-style: normal; letter-spacing: .04em; }
-      .rules h3 { margin: 24px 0 10px; color: #3b1782; font-size: 15px; } ol { display: grid; gap: 9px; margin: 0; padding-left: 20px; color: #4a4560; font-size: 13px; line-height: 1.45; } ol b { color: #191c1c; } table { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 12.5px; } th,td { padding: 8px 10px; border-bottom: 1px solid #eae5f8; text-align: left; } th { color: #3b1782; } .warning { margin: 10px 0 0; padding: 12px; border-radius: 10px; background: #fff7ed; color: #70410e; font-size: 12.5px; line-height: 1.45; }
-      @media(max-width:650px){ main{grid-template-columns: minmax(0,300px);}.rules{grid-column:1}.schedule{grid-template-columns:1fr;} }
-    </style>
-  </head>
-  <body>
-    <main>
-      <section class="card feed" aria-label="VMC ahora"><header class="head"><div><h1>VMC ahora</h1><p class="sub">Actividad en tiempo real</p></div><span class="live">EN VIVO</span></header><div id="items"></div></section>
-      <aside class="card panel"><h2>Valorizaciones</h2><div class="label">Cómo se ve <span class="chip">Texto</span></div><div class="label">Cómo entra <span class="chip">Contador</span></div><button id="simulate">Simular valorización</button></aside>
-      <section class="card rules"><h2>Reglas de publicación AVT</h2><p>Horario y reglas del script · zona horaria: America/Lima</p><div class="schedule"><article class="time"><b>Horario diurno</b><span>08:00:00–23:59:59</span><span class="loop"><em>↻ LOOP</em>3 → 2 → 5 → 4 → 7 → 12 min</span><span>El loop inicia nuevamente a las 08:00.</span></article><article class="time"><b>Horario nocturno</b><span>00:00:00–07:59:59</span><span class="loop"><em>↻ LOOP</em>34 → 21 min</span><span>El loop inicia nuevamente a las 00:00.</span></article></div><h3>Qué debe decidir el script</h3><ol><li>Publicar solo valorizaciones activas de AVT con <b>año 2020 o superior</b>, marca, modelo, precio, moneda y fecha de cálculo válidos.</li><li>El feed mockea actividad: <b>“Un usuario acaba de valorizar un [marca + modelo + año]”</b>, usando el valor referencial de AVT.</li><li>La unicidad diaria es <b>marca + modelo</b>. El año no cuenta.</li><li>La lista de marca + modelo usados se limpia a las <b>00:00:00</b>.</li><li>Si el servicio se detiene, omite horarios vencidos y continúa con el siguiente horario futuro.</li></ol><h3>Grupos de modelos</h3><table><thead><tr><th>Grupo</th><th>Días permitidos</th></tr></thead><tbody><tr><td>A</td><td>Lunes y jueves</td></tr><tr><td>B</td><td>Martes y sábado</td></tr><tr><td>C</td><td>Miércoles y domingo</td></tr><tr><td>D</td><td>Viernes</td></tr></tbody></table><h3>Filtro de marcas</h3><ol start="6"><li>Se permiten marcas regulares. El máximo nivel premium permitido es <b>Lexus, Audi, BMW y Ford</b>.</li><li>Se excluyen: <b>Aston Martin, Bentley, Bugatti, Ferrari, Lamborghini, Maserati, Maybach, McLaren, Porsche y Rolls-Royce</b>.</li></ol><p class="warning">Las marcas premium no aprobadas expresamente quedan fuera hasta una nueva decisión de negocio.</p></section>
-    </main>
-    <script>
-      const valuations = [
-        ['Kia Sportage 2021','16,880'],['Toyota Corolla 2020','19,480'],['Volvo XC40 2021','31,240'],['Mazda CX-5 2020','21,760'],['BMW X1 2020','26,390'],['Audi Q3 2021','29,680'],['Hyundai Tucson 2021','19,240'],['Toyota Yaris 2021','11,860']
-      ];
-      const used = new Set(); const items = document.querySelector('#items');
-      function nextValuation(){ const available=valuations.filter(([model])=>!used.has(model)); const entry=(available.length?available:valuations)[Math.floor(Math.random()*(available.length||valuations.length))]; used.add(entry[0]); return entry; }
-      function add(){ const [model,price]=nextValuation(); const el=document.createElement('article'); el.className='item'; el.innerHTML=`<span class="avatar">VMC</span><div><p class="who">VMC <span class="verified">●</span><span class="when">Ahora</span></p><p class="value">Un usuario acaba de valorizar un <b>${model}</b> por <b>US$ ${price}</b>.</p><a class="cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div>`; items.prepend(el); while(items.children.length>8)items.lastElementChild.remove(); }
-      add(); add(); add(); document.querySelector('#simulate').addEventListener('click',add);
-    </script>
-  </body>
-</html>
+<!DOCTYPE html><html lang="es"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" as="image" href="/assets/brand/logo-voyager.svg"/><link rel="preload" as="image" href="/banners/vmc/hero-publica-d.jpg"/><link rel="preload" as="image" href="/banners/vmc/valoriza-auto.jpg"/><link rel="stylesheet" href="/_next/static/css/09ddcb5dc1daf69c.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/ce7136fd51b69ab2.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/webpack-a02576fff1a433cd.js"/><script src="/_next/static/chunks/87c73c54-94dfd33dd614faf8.js" async=""></script><script src="/_next/static/chunks/968-06dd92fb513e7da9.js" async=""></script><script src="/_next/static/chunks/main-app-88862d8a2a9c9025.js" async=""></script><script src="/_next/static/chunks/270-62666d393c98200e.js" async=""></script><script src="/_next/static/chunks/app/solo/page-d46eb0bd7c031817.js" async=""></script><title>VMC ahora</title><meta name="description" content="Feed de novedades de VMC."/><link rel="icon" href="/icon.svg?d9d4043a4fcf9008" type="image/svg+xml" sizes="any"/><script src="/_next/static/chunks/polyfills-42372ed130431b0a.js" noModule=""></script></head><body><div hidden=""><!--$--><!--/$--></div><div class="__variable_532bb9"><main style="box-sizing:border-box;min-height:100vh;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:24px;padding:40px 16px;background:#F4F2FA"><div style="display:flex;width:300px;max-width:100%;height:560px"><aside class="va va--timeline" aria-label="VMC ahora"><header class="va-head"><div style="display:grid;gap:2px;min-width:0"><h3>VMC ahora</h3><p>Actividad en tiempo real</p></div><span class="va-live"><i></i>En vivo</span></header><ol class="va-posts va-scroll va-scroll--gris" aria-live="polite"><li class="va-post va-enter"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Ahora</span></div><div class="va-ad va-ad--card"><span class="va-ad__media"><img src="/banners/vmc/hero-publica-d.jpg" alt="" style="object-position:22% 55%"/><button type="button" class="va-glass">Publicar</button></span><div class="va-ad__body"><b>Publica tu auto en VMC y recibe ofertas</b><span>Empresas y compradores verificados.</span></div></div><div class="va-acts va-acts--share va-acts--views va-acts--palabra"><span class="va-acts__count va-acts__views" style="--k:#6B6880" aria-label="15 visualizaciones"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>15 visualizaciones</span><button type="button" style="--k:#4A2CE0" aria-label="Compartir"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 6 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 2 min</span></div><div class="va-val va-val--texto"><p class="va-post__text">Un usuario acaba de valorizar un <b>Mercedes-Benz GLA 2019</b> por <strong>US$ <!-- -->24,280</strong>.</p></div><a class="va-cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 6 min</span></div><p class="va-post__text" style="--k:#7B5CE6">Un usuario está solicitando una valorización<!-- -->.<!-- --> <em>Solicitud en proceso</em></p><a class="va-cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 10 min</span></div><div class="va-val va-val--texto"><p class="va-post__text">Un usuario acaba de valorizar un <b>Honda HR-V 2021</b> por <strong>US$ <!-- -->18,840</strong>.</p></div><a class="va-cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 12 min</span></div><p class="va-post__text" style="--k:#7B5CE6">Se registró un nuevo usuario en VMC<!-- -->.</p><div class="va-acts va-acts--share va-acts--views va-acts--palabra"><span class="va-acts__count va-acts__views" style="--k:#6B6880" aria-label="8 visualizaciones"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>8 visualizaciones</span><button type="button" style="--k:#4A2CE0" aria-label="Compartir"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 6 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 17 min</span></div><div class="va-val va-val--texto"><p class="va-post__text">Un usuario acaba de valorizar un <b>Honda HR-V 2021</b> por <strong>US$ <!-- -->18,840</strong>.</p></div><a class="va-cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 19 min</span></div><div class="va-ad va-ad--card"><span class="va-ad__media"><img src="/banners/vmc/valoriza-auto.jpg" alt="" style="object-position:75% 30%"/><button type="button" class="va-glass">Valorizar</button></span><div class="va-ad__body"><b>Valoriza tu auto en VMC</b><span>Descubre cuánto vale tu auto en minutos, gratis.</span></div></div><div class="va-acts va-acts--share va-acts--views va-acts--palabra"><span class="va-acts__count va-acts__views" style="--k:#6B6880" aria-label="26 visualizaciones"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>26 visualizaciones</span><button type="button" style="--k:#4A2CE0" aria-label="Compartir"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 6 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></li><li class="va-post"><div class="va-post__rail"><span class="va-av" style="width:32px;height:32px"><span class="va-av__in" style="background:#3B1782"><img src="/assets/brand/logo-voyager.svg" alt=""/></span></span><span class="va-post__line"></span></div><div class="va-post__main"><div class="va-post__head"><b>VMC</b><svg class="va-verified" width="12" height="12" viewBox="0 0 24 24" aria-label="Verificado"><path d="M12 1.8l2.6 1.9 3.2-.2 1 3 2.6 1.9-1 3.1 1 3-2.6 1.9-1 3.1-3.2-.2L12 22.2l-2.6-1.9-3.2.2-1-3.1L2.6 15.5l1-3-1-3.1 2.6-1.9 1-3 3.2.2z" fill="url(#va-vg)"></path><defs><linearGradient id="va-vg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8460E5"></stop><stop offset="1" stop-color="#3B1782"></stop></linearGradient></defs><path d="M8 12.2l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>hace 23 min</span></div><div class="va-val va-val--texto"><p class="va-post__text">Un usuario acaba de valorizar un <b>Toyota Avanza 2020</b> por <strong>US$ <!-- -->12,190</strong>.</p></div><a class="va-cta" href="https://www.vmcsubastas.com/zona/valorizar">¡Valoriza aquí!</a></div></li></ol><style>
+@keyframes va-val-zoom { 0% { opacity: 0; transform: scale(0.7); } 60% { opacity: 1; transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes va-val-foto { from { transform: scale(1.3); } to { transform: scale(1); } }
+@keyframes va-val-brillo { from { transform: translateX(-130%) skewX(-20deg); } to { transform: translateX(340%) skewX(-20deg); } }
+.va-val { position: relative; box-sizing: border-box; display: grid; gap: 2px; margin: 6px 0 4px; overflow: hidden; border-radius: 12px; color: #000; font-size: 12.5px; line-height: 1.3; }
+.va-val b { font-size: 15px; font-weight: 800; }
+.va-val strong { font-size: 22px; font-weight: 800; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.va-val--texto, .va-val--post { display: block; border-radius: 0; font-size: inherit; line-height: inherit; }
+.va-val--texto p, .va-val--post p { margin: 0; color: #000; }
+.va-val--post .va-post__media { background: #fff; }
+.va-val--texto b, .va-val--texto strong, .va-val--post b, .va-val--post strong { color: #000; font-size: inherit; font-weight: 700; }
+.va-val--tarjeta { padding: 12px 14px; border: 1px solid #E1E3E2; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.va-val--precio { justify-items: center; padding: 12px; border: 1px solid #E1E3E2; background: #fff; text-align: center; }
+.va-val--precio b { font-size: 14px; }
+.va-val--precio strong { font-size: 28px; }
+.va-val--foto { color: #fff; }
+.va-val--foto img { display: block; width: 100%; height: 136px; object-fit: cover; }
+.va-val__veil { position: absolute; inset: auto 0 0; display: grid; gap: 1px; padding: 28px 12px 10px; background: linear-gradient(180deg, rgba(20,6,56,0), rgba(20,6,56,0.92) 48%); }
+.va-val--foto.va-val-fx--zoom img, .va-val--foto.va-val-fx--brillo img, .va-val--post.va-val-fx--zoom img, .va-val--post.va-val-fx--brillo img { animation: va-val-foto 0.9s cubic-bezier(0.2,0.7,0.2,1) both; }
+.va-val--fila { grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px; border: 1px solid #E1E3E2; background: #fff; }
+.va-val--fila img { width: 64px; height: 52px; border-radius: 8px; object-fit: cover; }
+.va-val--fila > span { display: grid; min-width: 0; }
+.va-val--fila b { font-size: 13px; }
+.va-val--fila strong { font-size: 17px; }
+.va-val-fx--zoom, .va-val-fx--brillo { animation: va-val-zoom 0.9s ease-out both; }
+.va-val-fx--brillo::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 45%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); pointer-events: none; animation: va-val-brillo 1s 0.7s ease both; }
+
+@keyframes va-in { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes va-flash { from { background: #F3EFFD; } to { background: transparent; } }
+@keyframes va-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+@keyframes va-pill { 0% { opacity: 0; transform: translate(-50%, -6px); } 15%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
+@keyframes va-ring { to { transform: rotate(360deg); } }
+.va { position: relative; box-sizing: border-box; width: 100%; height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: 16px;
+  font-family: var(--vmc-font-display, 'Plus Jakarta Sans', -apple-system, sans-serif); }
+.va-enter { animation: va-in 0.45s cubic-bezier(0.3,0,0,1); }
+.va-av { box-sizing: border-box; display: inline-grid; flex: none; border-radius: 50%; }
+.va-av__in { display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(59,23,130,0.1); }
+.va-av__in img { max-width: 72%; max-height: 72%; object-fit: contain; }
+.va-av__in b { font-size: 12px; font-weight: 800; color: #3B1782; }
+.va-verified { flex: none; }
+/* Cabecera de la referencia: 68 de alto, padding 0 24, título 20 + bajada 14, «En vivo» a la derecha. */
+.va-head { box-sizing: border-box; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 60px; padding: 0 20px; border-bottom: 1px solid #E8DDFF; }
+.va-head h3 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 700; letter-spacing: -0.01em; color: #3B1782; white-space: nowrap; }
+.va-head p { margin: 0; font-size: 12px; line-height: 16.8px; color: #6B6878; white-space: nowrap; }
+.va-live { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #E2531A; }
+.va-live i { width: 6px; height: 6px; border-radius: 50%; background: #FF7A1A; animation: va-pulse 1.4s ease-in-out infinite; }
+/* Scroll integrado al sistema visual: discreto, redondeado y consistente entre vistas. */
+.va-scroll { scrollbar-gutter: stable; }
+/* scrollbar-color solo donde no hay ::-webkit-scrollbar (Firefox): en Edge y Chrome, si está definido, anula los estilos de abajo. */
+@supports not selector(::-webkit-scrollbar) {
+  .va-scroll { scrollbar-width: thin; scrollbar-color: #8460E5 transparent; }
+  .va-scroll--gris { scrollbar-color: #D9D6E2 transparent; }
+  .va-scroll--vidrio { scrollbar-color: rgba(214,210,228,0.8) transparent; }
+}
+.va-scroll::-webkit-scrollbar { width: 8px; }
+.va-scroll::-webkit-scrollbar-track { margin: 8px 0; background: transparent; }
+.va-scroll::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: 999px; background: linear-gradient(180deg, #CDBBFF, #7B5CE6) padding-box; box-shadow: 0 2px 7px rgba(59,23,130,0.18); }
+.va-scroll::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #B295FF, #5A36C9) padding-box; }
+/* Gris claro: fino y sin sombra, apenas se nota hasta pasar el puntero. */
+.va-scroll--gris::-webkit-scrollbar { width: 7px; }
+.va-scroll--gris::-webkit-scrollbar-thumb { background: #DEDBE6 padding-box; box-shadow: none; }
+.va-scroll--gris::-webkit-scrollbar-thumb:hover { background: #C4C0D0 padding-box; }
+/* Vidrio: blanco translúcido con un filete fino, como los botones de vidrio. */
+.va-scroll--vidrio::-webkit-scrollbar { width: 9px; }
+.va-scroll--vidrio::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(236,233,245,0.9)) padding-box;
+  box-shadow: inset 0 0 0 1px rgba(59,23,130,0.12), 0 1px 4px rgba(16,0,48,0.12); }
+.va-scroll--vidrio::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #fff, rgba(226,222,240,0.95)) padding-box; }
+
+/* Normal */
+.va--normal { padding: 0 0 8px; background: #fff; box-shadow: rgba(0,0,0,0.07) 0 0 16px 4px; }
+.va-list { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-around; overflow-y: auto; overscroll-behavior: contain; margin: 4px 16px 0; padding: 0; list-style: none; }
+.va-row { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 0; }
+.va-row + .va-row { border-top: 1px solid #E1E3E2; }
+.va-row > img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; }
+.va-row__txt { display: grid; gap: 3px; min-width: 0; }
+.va-row__txt strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: #3b1782; }
+.va-row__detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #5b5b66; }
+
+/* Timeline (X / Twitter) */
+.va--timeline { background: #fff; box-shadow: rgba(0,0,0,0.07) 0 0 16px 4px; }
+.va-live { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #E2531A; }
+.va-live i { width: 6px; height: 6px; border-radius: 50%; background: #FF7A1A; animation: va-pulse 1.4s ease-in-out infinite; }
+.va-newpill { position: absolute; top: 60px; left: 50%; z-index: 3; display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #8460E5, #3B1782); box-shadow: rgba(59,23,130,0.35) 0 6px 14px;
+  opacity: 0; pointer-events: none; animation: va-pill 2.2s ease forwards; }
+.va-posts { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 0; list-style: none; }
+.va-post { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; padding: 12px 20px 2px; }
+.va-post.va-enter { animation: va-in 0.45s cubic-bezier(0.3,0,0,1), va-flash 2.4s ease; }
+/* Hilo: el avatar y una línea fina que lo une con la publicación siguiente (como Threads). */
+.va-post__rail { display: flex; flex-direction: column; align-items: center; }
+.va-post__line { flex: 1; width: 2px; min-height: 12px; margin-top: 8px; border-radius: 2px; background: #E4E0F0; }
+.va-post:last-child .va-post__line { display: none; }
+.va-post__main { min-width: 0; padding-bottom: 12px; }
+.va-post__head { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: 13px; line-height: 18px; }
+.va-post__head b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; color: #14112B; }
+.va-post__head span { flex: none; color: #8A879C; font-size: 12px; font-weight: 400; }
+.va-post__text { margin: 2px 0 0; font-size: 13px; line-height: 18px; color: #24203D; }
+.va-post__text em { font-style: normal; font-weight: 700; color: #14112B; }
+.va-post__media { position: relative; display: block; margin-top: 10px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #F3EFFD; }
+.va-post__media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.va-post__media b { position: absolute; left: 10px; bottom: 10px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(16,0,48,0.62); }
+/* Timeline · fila tipo listado de eBay (escala de las cards chicas) */
+.va-item { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 18px 12px 20px; }
+.va-item + .va-item { border-top: 1px solid #EFEDF5; }
+.va-item.va-enter { animation: va-in 0.45s cubic-bezier(0.3,0,0,1), va-flash 2.4s ease; }
+.va-item__thumb { display: block; width: 72px; height: 72px; overflow: hidden; border-radius: 12px; background: #F3EFFD; }
+.va-item__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.va-item__main { display: grid; gap: 3px; min-width: 0; }
+.va-item__pill { justify-self: start; display: inline-flex; align-items: center; height: 18px; padding: 0 8px; border-radius: 999px; border: 1.5px solid var(--k);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--k); background: color-mix(in srgb, var(--k) 10%, #fff); }
+.va-item__title { margin: 1px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 1.2; font-weight: 800; color: #14112B; }
+.va-item__value { font-size: 14px; line-height: 1.2; font-weight: 800; letter-spacing: -0.01em; color: #4C1EBC; }
+.va-item__meta { display: flex; align-items: center; gap: 3px; min-width: 0; font-size: 11px; color: #6B6880; white-space: nowrap; }
+.va-item__meta > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.va-item__who { flex: none; max-width: 84px; overflow: hidden; text-overflow: ellipsis; }
+.va-item__meta .va-verified { width: 10px; height: 10px; }
+
+
+/* Estilo X (feed a pantalla completa en móvil): la anatomía del post de X. Grises y separadores de X
+   (#0F1419 texto, #536471 secundario, #EFF3F4 filete); el acento es el morado de VMC en vez del azul de X. */
+.va--x { border-radius: 0; box-shadow: none; color: #0F1419; }
+.va--x .va-posts { padding: 0; }
+.va--x.va--page { height: auto; flex: none; overflow: visible; }
+.va--x.va--page .va-posts { flex: none; overflow: visible; }
+.va-x { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; padding: 12px 16px 4px; border-bottom: 1px solid #EFF3F4; cursor: pointer; transition: background 0.2s; }
+.va-x:hover { background: #F7F9F9; }
+.va-x.va-enter { animation: va-in 0.45s cubic-bezier(0.3,0,0,1), va-flash 2.4s ease; }
+.va-x .va-av { margin-top: 2px; }
+.va-x__head { display: flex; align-items: center; gap: 4px; min-width: 0; padding-right: 26px; font-size: 15px; line-height: 20px; }
+.va-x__head b { flex: none; max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; color: #0F1419; }
+.va-x__head .va-verified { width: 16px; height: 16px; }
+.va-x__head span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #536471; font-weight: 400; }
+.va-x__more { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%;
+  background: none; color: #536471; cursor: pointer; }
+.va-x__more:hover { background: rgba(59,23,130,0.1); color: #3B1782; }
+.va-x__text { margin: 0; font-size: 15px; line-height: 20px; color: #0F1419; overflow-wrap: anywhere; }
+.va-x__text em { font-style: normal; font-weight: 700; color: #0F1419; }
+.va-hl { font-weight: 700; color: inherit; }
+.va-x .va-post__media { margin-top: 12px; border: 1px solid #CFD9DE; border-radius: 16px; }
+.va-x__acts { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 0 -8px; max-width: 425px; }
+.va-x__acts > span { display: flex; gap: 2px; }
+.va-x__acts button { display: inline-flex; align-items: center; gap: 2px; height: 34px; padding: 0 8px 0 0; border: 0; background: none; cursor: pointer;
+  font: 400 13px/1 var(--vmc-font-display, 'Plus Jakarta Sans', sans-serif); color: #536471; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.va-x__acts button i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; transition: background 0.2s, color 0.2s; }
+.va-x__acts button:hover { color: var(--k); }
+.va-x__acts button:hover i { background: color-mix(in srgb, var(--k) 12%, transparent); }
+.va-x__acts button[aria-pressed="true"] { color: var(--k); }
+.va-x__acts button[aria-pressed="true"] i svg path { fill: currentColor; }
+.va-x__acts button[aria-pressed="true"] i { animation: va-pop 0.35s cubic-bezier(0.3,1.6,0.5,1); }
+.va-x__acts button:focus-visible { outline: 2px solid #8460E5; outline-offset: 1px; border-radius: 999px; }
+@keyframes va-pop { 40% { transform: scale(1.25); } }
+/* Aviso de novedades estilo X: píldora con mini avatares que aparece arriba. */
+.va--x .va-newpill { position: sticky; top: 10px; display: flex; width: max-content; margin: 0 auto -32px; gap: 6px; padding: 4px 12px 4px 6px; font-size: 13px; background: #3B1782; }
+.va-newpill .va-av { margin-left: -6px; box-shadow: 0 0 0 2px #3B1782; }
+.va-newpill .va-av:first-of-type { margin-left: 0; }
+@media (prefers-reduced-motion: reduce) { .va-x__acts button i { animation: none !important; } }
+
+/* «Ver más» (móvil, sin scroll): la card crece con su contenido y un botón va sumando publicaciones. */
+.va--auto { height: auto; flex: none; }
+.va--auto .va-posts { flex: none; overflow: visible; }
+.va-reveal { animation: va-in 0.45s cubic-bezier(0.3,0,0,1) both; }
+.va-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: calc(100% - 32px); height: 40px; margin: 6px 16px 14px; border: 1px solid #ECE8F6;
+  border-radius: 999px; background: #fff; color: #3B1782; cursor: pointer; font: 700 13px/1 var(--vmc-font-display, 'Plus Jakarta Sans', sans-serif); transition: background 0.2s, border-color 0.2s; }
+.va-more:hover { background: #F8F6FF; border-color: #CDBEFF; }
+.va-more:focus-visible { outline: 2px solid #8460E5; outline-offset: 2px; }
+.va-more svg { transition: transform 0.25s; }
+.va-more[data-less] svg { transform: rotate(180deg); }
+
+/* Insignia del tipo de entrada (nueva / disponible / propuesta / publicidad…), para no hacer pasar la rotación por nueva. */
+.va-tag { display: inline-flex; align-items: center; height: 18px; margin: 3px 0 3px; padding: 0 7px; border-radius: 999px; font-size: 9.5px; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--k); background: color-mix(in srgb, var(--k) 11%, #fff); }
+.va-x .va-tag { margin-top: 4px; }
+/* Propuesta enviada: texto + foto pequeña de la oferta, sin enlace. */
+.va-prop { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 10px; align-items: start; }
+.va-prop > img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: #F3EFFD; }
+/* Acciones de oferta en el timeline: me gusta · participantes o negociaciones · compartir. */
+.va-acts { display: flex; align-items: center; gap: 2px; margin: 6px 0 0 -6px; font-size: 12px; color: #6B6880; }
+.va-acts button, .va-acts__count { display: inline-flex; align-items: center; gap: 5px; min-width: 0; height: 28px; padding: 0 6px; border: 0; border-radius: 999px;
+  background: none; font: inherit; color: inherit; white-space: nowrap; }
+.va-acts button { flex: none; cursor: pointer; transition: background 0.2s, color 0.2s; }
+.va-acts button:hover { background: #F3EFFD; color: var(--k); }
+.va-acts button[aria-pressed="true"] { color: var(--k); }
+.va-acts button[aria-pressed="true"] svg path { fill: currentColor; }
+.va-acts button:focus-visible { outline: 2px solid #8460E5; outline-offset: 1px; }
+.va-acts button:last-child { margin-left: auto; }
+.va-acts svg { flex: none; width: 16px; height: 16px; }
+.va-acts__count { overflow: hidden; text-overflow: ellipsis; }
+.va-acts__views { flex: none; }
+/* Timeline (columna angosta): fila más compacta para que «38 participantes» / «4 negociaciones» entren completos. */
+.va-post .va-acts { gap: 0; margin-left: -3px; font-size: 10.5px; letter-spacing: -0.015em; }
+.va-post .va-acts button, .va-post .va-acts__count { gap: 2px; padding: 0 2px; }
+.va-post .va-acts svg { width: 13px; height: 13px; }
+/* Solo compartir (propuestas, registros, publicidad, blog): el botón queda a la derecha, como en las ofertas. */
+.va-acts--share { justify-content: flex-end; margin-top: 2px; }
+.va-x__acts.va-acts--share { justify-content: flex-end; }
+.va-acts__count svg { color: var(--k); }
+.va-x__acts > .va-acts__count { display: inline-flex; align-items: center; gap: 2px; min-width: 0; height: 34px; padding-right: 8px; overflow: hidden; text-overflow: ellipsis;
+  font: 400 13px/1 var(--vmc-font-display, 'Plus Jakarta Sans', sans-serif); color: #536471; white-space: nowrap; }
+.va-x__acts > .va-acts__count i { display: grid; place-items: center; flex: none; width: 34px; height: 34px; color: var(--k); }
+/* Listado: títulos de hasta dos líneas (las propuestas y la publicidad no tienen lote) y avatar cuando no hay foto. */
+.va-item__title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal; }
+.va-item__thumb--av { display: grid; place-items: center; background: #F8F6FF; }
+/* Publicidad: la foto del banner y su botón, para que se lea como anuncio. */
+.va-ad { position: relative; display: block; margin-top: 8px; overflow: hidden; border-radius: 14px; }
+.va-ad--banner { aspect-ratio: 1 / 1; color: #fff; background: #2A0E6E; }
+.va-x .va-ad--banner { aspect-ratio: 4 / 3; }
+.va-ad--banner > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.va-ad__veil { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; display: grid; gap: 3px; justify-items: start; padding: 48px 12px 12px;
+  background: linear-gradient(180deg, rgba(42,14,110,0) 0%, rgba(42,14,110,0.78) 48%, #2A0E6E 100%); }
+.va-ad--banner b { font-size: 15px; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+.va-ad__veil span { font-size: 12px; line-height: 1.3; color: rgba(255,255,255,0.88); }
+.va-ad--banner .va-glass { margin-top: 8px; }
+.va-ad--card { border: 1px solid #E6E1F5; background: #fff; }
+.va-ad__media { position: relative; display: block; aspect-ratio: 16 / 9; background: #F3EFFD; }
+.va-ad__media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.va-ad__body { display: grid; gap: 3px; justify-items: start; padding: 10px 12px 12px; }
+.va-ad--card b { font-size: 14px; line-height: 1.25; font-weight: 800; color: #14112B; }
+.va-ad__body span { font-size: 12px; line-height: 1.3; color: #5B5870; }
+/* Botón de vidrio del banner principal (hib-glass del design system), en chico: blanco translúcido, blur y borde VYStrokes1.
+   Va siempre sobre la foto, donde se lee. */
+.va-glass { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 18px; border: 0;
+  border-radius: 100px; font: 600 13px/1 var(--vmc-font-display, 'Plus Jakarta Sans', -apple-system, sans-serif); color: #fff; white-space: nowrap; cursor: pointer;
+  background-color: transparent;
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.03) 100%);
+  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  box-shadow: rgba(0,0,0,0.1) 0 8px 24px, inset 0 1px 6px rgba(255,255,255,0.45); text-shadow: rgba(0,0,0,0.25) 0 1px 3px;
+  transition: background-color 0.25s, box-shadow 0.25s, transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.va-glass::before { content: ""; position: absolute; inset: 0; padding: 1.5px; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(94deg, #FFFFFF 0%, #F4AC59 22.1%, #8460E5 74.5%, #FFFFFF 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.va-glass:hover { transform: translateY(-1px); background-color: rgba(255,255,255,0.1); box-shadow: rgba(0,0,0,0.16) 0 12px 28px, inset 0 1px 8px rgba(255,255,255,0.6); }
+.va-glass:active { transform: translateY(1px) scale(0.97); background-color: rgba(32,0,104,0.22); }
+.va-glass:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.va-ad__media .va-glass { position: absolute; left: 10px; bottom: 10px; z-index: 2; }
+.va-ad__badge { position: absolute; top: 8px; left: 8px; z-index: 3; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.03em; color: #3B1782; background: rgba(255,255,255,0.92); box-shadow: rgba(16,0,48,0.18) 0 2px 6px; }
+.va-ad__when { font-weight: 600; color: #8A879C; }
+/* Visualizaciones en su propia línea (estilos «ojo-palabra» y «texto»). */
+.va-views { display: flex; align-items: center; gap: 4px; margin: 8px 0 0; font-size: 12px; color: #6B6880; }
+.va-views b { font-weight: 700; color: #14112B; }
+.va-views svg { width: 14px; height: 14px; }
+.va-acts--views { justify-content: space-between; }
+/* Alineación de la fila (control «fila de acciones»): todo a la izquierda o todo a la derecha, sin hueco en el medio. */
+.va-acts.va-acts--izquierda, .va-x__acts.va-acts--izquierda { justify-content: flex-start; gap: 10px; }
+.va-acts--izquierda button:last-child { margin-left: 0; }
+.va-acts.va-acts--derecha, .va-x__acts.va-acts--derecha { justify-content: flex-end; gap: 10px; }
+.va-cta, .va-x__cta { display: inline-block; margin-top: 8px; color: #3B1782; font: 700 11px/1.2 var(--vmc-font-display, 'Plus Jakarta Sans', sans-serif); text-decoration: underline; text-underline-offset: 2px; }
+.va-cta:hover, .va-x__cta:hover { color: #8460E5; }
+.va-cta:focus-visible, .va-x__cta:focus-visible { outline: 2px solid #8460E5; outline-offset: 2px; border-radius: 2px; }
+.va-x__cta { margin-top: 10px; font-size: 12px; }
+.va-item__thumb--av .va-av__in img { width: auto; height: auto; max-width: 72%; max-height: 72%; object-fit: contain; }
+</style></aside></div><section class="va-qa" aria-label="Reglas de valorización"><h2>Valorizaciones</h2><div class="va-qa__opts"><span>Cómo se ve</span><span class="va-qa__chip">Texto</span></div><div class="va-qa__opts"><span>Cómo entra</span><span class="va-qa__chip">Contador</span></div><style id="concorde-button-styles-ssr">
+@property --vbtn-angle { syntax: "<angle>"; inherits: false; initial-value: 135deg; }
+@property --vbtn-stop-a { syntax: "<color>"; inherits: false; initial-value: oklch(0.72 0.16 55); }
+@property --vbtn-stop-b { syntax: "<color>"; inherits: false; initial-value: oklch(0.55 0.22 285); }
+@property --vsec-angle { syntax: "<angle>"; inherits: false; initial-value: 160deg; }
+@property --vsec-stop-a { syntax: "<color>"; inherits: false; initial-value: oklch(0.38 0.20 285); }
+@property --vsec-stop-b { syntax: "<color>"; inherits: false; initial-value: oklch(0.28 0.18 285); }
+@property --vneg-angle { syntax: "<angle>"; inherits: false; initial-value: 135deg; }
+@property --vneg-stop-a { syntax: "<color>"; inherits: false; initial-value: #00aeb1; }
+@property --vneg-stop-b { syntax: "<color>"; inherits: false; initial-value: #8460e5; }
+@property --vss-angle { syntax: "<angle>"; inherits: false; initial-value: 160deg; }
+@property --vss-stop-a { syntax: "<color>"; inherits: false; initial-value: #8460e5; }
+@property --vss-stop-b { syntax: "<color>"; inherits: false; initial-value: #3b1782; }
+
+/* ── primary ─────────────────────────────────────────────────────────── */
+.pvbtn {
+  --vbtn-stop-a: var(--vmc-color-orange-600, #ed8936);
+  --vbtn-stop-b: var(--vmc-color-vault-500, #8460e5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 56px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  /* Borde GRADIENTE de Figma (1130:1778): white → #FBC47D 25% → #AE8EFF 75% → white */
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  text-shadow: rgba(0,0,0,0.25) 0 1px 3px;
+  background-image:
+    linear-gradient(var(--vbtn-angle), var(--vbtn-stop-a) 0%, var(--vbtn-stop-a) 40%, var(--vbtn-stop-b) 100%),
+    linear-gradient(135deg, #ffffff 0%, #fbc47d 25%, #ae8eff 75%, #ffffff 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: rgba(255,255,255,0.28) 0 1px 0 2px inset, rgba(237,137,54,0.3) 0 2px 6px;
+  transition:
+    --vbtn-angle 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    --vbtn-stop-a 0.35s,
+    --vbtn-stop-b 0.35s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.pvbtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(rgba(255,255,255,0.17) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.pvbtn::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(135deg,
+    var(--vmc-color-orange-600, oklch(0.72 0.16 55)),
+    var(--vmc-color-vault-500, oklch(0.55 0.22 285))
+  );
+  filter: blur(14px);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s, filter 0.3s;
+}
+.pvbtn:hover {
+  --vbtn-angle: 220deg;
+  --vbtn-stop-a: var(--vmc-color-orange-400, #fbc47d);
+  --vbtn-stop-b: var(--vmc-color-vault-400, #ae8eff);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: rgba(255,255,255,0.22) 0 1px 0 2px inset, rgba(132,96,229,0.35) 0 8px 24px, rgba(237,137,54,0.4) 0 4px 10px;
+}
+.pvbtn:hover::after { opacity: 0.45; filter: blur(18px); }
+.pvbtn:active {
+  --vbtn-angle: 135deg;
+  --vbtn-stop-a: var(--vmc-color-orange-700, #d46e20);
+  --vbtn-stop-b: var(--vmc-color-vault-600, #5a35c2);
+  color: #d1d5dc;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.22) 0 2px 5px 2px inset, rgba(0,0,0,0.12) 0 1px 3px;
+}
+.pvbtn:active::after { opacity: 0; }
+.pvbtn:disabled {
+  background-image: none;
+  background-color: var(--vmc-color-background-disabled, #e1e3e2);
+  color: var(--vmc-color-neutral-700, #99a1af);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  border-color: transparent;
+}
+.pvbtn:disabled::after { display: none; }
+.pvbtn:focus-visible {
+  outline: transparent solid 3px;
+  outline-offset: 4px;
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 5px var(--vmc-color-vault-500, oklch(0.55 0.22 285)),
+    0 8px 16px -4px rgb(51.76% 37.65% 89.8% / 0.30);
+}
+
+/* ── secondary ───────────────────────────────────────────────────────── */
+.psec {
+  --vsec-stop-a: var(--vmc-color-vault-500, #8460e5);
+  --vsec-stop-b: var(--vmc-color-vault-700, #3b1782);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 56px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  /* Borde GRADIENTE lila de Figma (1133:2294): #CFBAFF → white 35% → #AE8EFF 65% → #CFBAFF */
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  text-shadow: rgba(0,0,0,0.3) 0 1px 3px;
+  background-image:
+    linear-gradient(var(--vsec-angle), var(--vsec-stop-a) 0%, var(--vsec-stop-b) 100%),
+    linear-gradient(135deg, #cfbaff 0%, #ffffff 35%, #ae8eff 65%, #cfbaff 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: rgba(255,255,255,0.22) 0 1px 0 2px inset, rgba(132,96,229,0.3) 0 2px 8px;
+  transition:
+    --vsec-angle 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    --vsec-stop-a 0.35s,
+    --vsec-stop-b 0.35s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.psec::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(rgba(255,255,255,0.15) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.psec::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(135deg,
+    var(--vmc-color-vault-500, oklch(0.55 0.22 285)),
+    var(--vmc-color-vault-700, oklch(0.38 0.20 285))
+  );
+  filter: blur(14px);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s, filter 0.3s;
+}
+.psec:hover {
+  --vsec-angle: 219deg;
+  --vsec-stop-a: var(--vmc-color-vault-400, #ae8eff);
+  --vsec-stop-b: var(--vmc-color-vault-600, #5a35c2);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: rgba(255,255,255,0.2) 0 1px 0 2px inset, rgba(132,96,229,0.4) 0 8px 24px, rgba(132,96,229,0.25) 0 4px 10px;
+}
+.psec:hover::after { opacity: 0.45; filter: blur(18px); }
+.psec:active {
+  --vsec-angle: 160deg;
+  --vsec-stop-a: var(--vmc-color-vault-700, #3b1782);
+  --vsec-stop-b: var(--vmc-color-vault-900, #22005c);
+  color: #d1d5dc;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.28) 0 2px 5px 2px inset, rgba(0,0,0,0.14) 0 1px 3px;
+}
+.psec:active::after { opacity: 0; }
+.psec:disabled {
+  background-image: none;
+  background-color: var(--vmc-color-background-disabled, #e1e3e2);
+  color: var(--vmc-color-neutral-700, #99a1af);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  border-color: transparent;
+}
+.psec:disabled::after { display: none; }
+.psec:focus-visible {
+  outline: transparent solid 3px;
+  outline-offset: 4px;
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 5px var(--vmc-color-vault-500, oklch(0.55 0.22 285)),
+    0 8px 16px -4px rgb(51.76% 37.65% 89.8% / 0.30);
+}
+
+/* ── ghost · "Ver Ofertas relacionadas" ─────────────────────────────────
+   Sync SVG Figma (1143:1709/1885/1909): frame 215×48 con texto casi al
+   borde → padding 12px (antes 28px). Estados ya coincidían exacto. */
+.pghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 12px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  border: 2px solid rgba(255,255,255,0.75);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  background: transparent;
+  text-shadow: rgba(0,0,0,0.18) 0 1px 3px;
+  box-shadow: rgba(255,255,255,0.2) 0 1px 0 2px inset, rgba(255,255,255,0.15) 0 0 0 1px;
+  transition:
+    background 0.25s,
+    border-color 0.25s,
+    color 0.25s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.pghost::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(rgba(255,255,255,0.1) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.pghost::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(135deg,
+    var(--vmc-color-orange-600, oklch(0.72 0.16 55)),
+    var(--vmc-color-vault-500, oklch(0.55 0.22 285))
+  );
+  filter: blur(16px);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s, filter 0.3s;
+}
+.pghost:hover {
+  background: linear-gradient(146.64deg, #fff 0%, rgb(255,240,226) 100%);
+  border-color: #fff;
+  color: #ed8936;
+  text-shadow: rgba(0,0,0,0.25) 0 1px 3px;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: rgba(255,255,255,0.5) 0 1px 0 2px inset, rgba(0,0,0,0.2) 0 6px 20px;
+}
+.pghost:hover::after { opacity: 0.4; filter: blur(18px); }
+.pghost:active {
+  background: linear-gradient(146.56deg, rgb(212,110,32) 0%, rgb(183,55,0) 100%);
+  border-color: #d46e20;
+  color: var(--vmc-color-icon-disabled, #e1e3e2);
+  text-shadow: rgba(0,0,0,0.25) 0 1px 3px;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.22) 0 2px 5px 2px inset;
+}
+.pghost:active::after { opacity: 0; }
+.pghost:disabled {
+  /* SVG Ghost/Disabled (1153:2443): borde white 0.3, glass white 0.1→transparent, texto white 0.35 */
+  background: linear-gradient(rgba(255,255,255,0.1) 0%, transparent 55%);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.35);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.pghost:focus-visible {
+  outline: transparent solid 3px;
+  outline-offset: 4px;
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 5px var(--vmc-color-vault-500, oklch(0.55 0.22 285)),
+    0 8px 16px -4px rgb(51.76% 37.65% 89.8% / 0.30);
+}
+
+/* ── sm-guest ─────────────────────────────────────────────────────────── */
+.pvbtn-sm {
+  --vbtn-stop-a: var(--vmc-color-orange-600, #ed8936);
+  --vbtn-stop-b: var(--vmc-color-vault-500, #8460e5);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  min-width: 116px;
+  padding: 0 16px 0 4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  /* Borde GRADIENTE de Figma (1159:4466): white → #FBC47D 25% → #AE8EFF 75% → white */
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  text-shadow: rgba(0,0,0,0.2) 0 1px 2px;
+  background-image:
+    linear-gradient(var(--vbtn-angle), var(--vbtn-stop-a) 0%, var(--vbtn-stop-a) 40%, var(--vbtn-stop-b) 100%),
+    linear-gradient(135deg, #ffffff 0%, #fbc47d 25%, #ae8eff 75%, #ffffff 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: rgba(255,255,255,0.25) 0 1px 0 2px inset, rgba(237,137,54,0.25) 0 2px 6px;
+  transition:
+    --vbtn-angle 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    --vbtn-stop-a 0.35s,
+    --vbtn-stop-b 0.35s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.pvbtn-sm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(rgba(255,255,255,0.15) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.pvbtn-sm:hover {
+  --vbtn-angle: 220deg;
+  --vbtn-stop-a: var(--vmc-color-orange-400, #fbc47d);
+  --vbtn-stop-b: var(--vmc-color-vault-400, #ae8eff);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: rgba(255,255,255,0.2) 0 1px 0 2px inset, rgba(132,96,229,0.3) 0 6px 18px, rgba(237,137,54,0.35) 0 3px 8px;
+}
+.pvbtn-sm:active {
+  --vbtn-angle: 135deg;
+  --vbtn-stop-a: var(--vmc-color-orange-700, #d46e20);
+  --vbtn-stop-b: var(--vmc-color-vault-600, #5a35c2);
+  color: #d1d5dc;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.22) 0 2px 4px 2px inset, rgba(255,255,255,0.28) 0 1px 0 inset, rgba(0,0,0,0.1) 0 1px 2px;
+}
+.pvbtn-sm:disabled {
+  background-image: none;
+  background-color: var(--vmc-color-background-disabled, #e1e3e2);
+  color: var(--vmc-color-neutral-700, #99a1af);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.pvbtn-sm:focus-visible {
+  outline: transparent solid 2px;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 4px var(--vmc-color-vault-500, oklch(0.55 0.22 285));
+}
+.pvbtn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  /* Figma SVG 1159:4466: círculo blanco translúcido (no oscuro) */
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── sm-logged-in ─────────────────────────────────────────────────────── */
+.pvbtn-auth-d {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px 0 4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  border: 2px solid rgba(255,255,255,0.7);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  text-shadow: rgba(0,0,0,0.22) 0 1px 2px;
+  background-image: linear-gradient(var(--vbtn-angle), var(--vbtn-stop-a) 0%, var(--vbtn-stop-a) 40%, var(--vbtn-stop-b) 100%);
+  box-shadow: rgba(255,255,255,0.28) 0 1px 0 2px inset, rgba(237,137,54,0.3) 0 2px 6px;
+  transition:
+    --vbtn-angle 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    --vbtn-stop-a 0.35s,
+    --vbtn-stop-b 0.35s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.pvbtn-auth-d:hover {
+  --vbtn-angle: 220deg;
+  --vbtn-stop-a: var(--vmc-color-orange-400, #fbc47d);
+  --vbtn-stop-b: var(--vmc-color-vault-400, #ae8eff);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: rgba(255,255,255,0.22) 0 1px 0 2px inset, rgba(132,96,229,0.35) 0 8px 24px, rgba(237,137,54,0.4) 0 4px 10px;
+}
+.pvbtn-auth-d:active {
+  --vbtn-angle: 135deg;
+  --vbtn-stop-a: var(--vmc-color-orange-700, #d46e20);
+  --vbtn-stop-b: var(--vmc-color-vault-600, #5a35c2);
+  color: #d1d5dc;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.22) 0 2px 5px 2px inset, rgba(0,0,0,0.12) 0 1px 3px;
+}
+.pvbtn-auth-d:disabled {
+  background-image: none;
+  background-color: var(--vmc-color-background-disabled, #e1e3e2);
+  color: var(--vmc-color-neutral-700, #99a1af);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.pvbtn-auth-d:focus-visible {
+  outline: transparent solid 3px;
+  outline-offset: 4px;
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 5px var(--vmc-color-vault-500, oklch(0.55 0.22 285)),
+    0 8px 16px -4px rgb(51.76% 37.65% 89.8% / 0.30);
+}
+.pvbtn-auth-d-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+.pvbtn-auth-d-username {
+  font-weight: 700;
+  opacity: 0.92;
+}
+
+/* ── prefers-reduced-motion ──────────────────────────────────────────── */
+/* ── negotiable (teal → vault) · sync EXACTO del SVG export de Figma ────
+   Nodos 1807:14907/14943/14957 · 200×48 FIJO · borde gradiente teal→vault
+   Spec: .claude/concorde/inbox/figma-ButtonNegotiable-svg-export.json */
+.pneg {
+  --vneg-stop-a: var(--vmc-color-teal-500, #00aeb1);
+  --vneg-stop-b: var(--vmc-color-vault-500, #8460e5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  min-width: 200px;
+  padding: 0 24px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  /* Borde GRADIENTE de Figma (no blanco sólido): capa border-box bajo el fill */
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  text-shadow: rgba(0,0,0,0.25) 0 1px 3px;
+  background-image:
+    linear-gradient(var(--vneg-angle), var(--vneg-stop-a) 0%, var(--vneg-stop-a) 40%, var(--vneg-stop-b) 100%),
+    linear-gradient(135deg, #ffffff 0%, #4ddcdc 25%, #6445df 75%, #ffffff 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: rgba(255,255,255,0.28) 0 1px 0 2px inset, rgba(0,174,177,0.35) 0 2px 6px;
+  transition:
+    --vneg-angle 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    --vneg-stop-a 0.35s,
+    --vneg-stop-b 0.35s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.pneg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(rgba(255,255,255,0.17) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.pneg::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(135deg,
+    var(--vmc-color-teal-500, #00aeb1),
+    var(--vmc-color-vault-500, #8460e5)
+  );
+  filter: blur(14px);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s, filter 0.3s;
+}
+.pneg:hover {
+  --vneg-angle: 220deg;
+  --vneg-stop-a: var(--vmc-color-teal-400, #00cccc);
+  --vneg-stop-b: var(--vmc-color-vault-400, #ae8eff);
+  transform: translateY(-2px) scale(1.02);
+  /* Sombras exactas del SVG hover: teal cercana + glow púrpura #6445DF */
+  box-shadow: rgba(255,255,255,0.22) 0 1px 0 2px inset, rgba(0,174,177,0.4) 0 4px 10px, rgba(100,69,223,0.35) 0 8px 24px;
+}
+.pneg:hover::after { opacity: 0.45; filter: blur(18px); }
+.pneg:active {
+  --vneg-angle: 135deg;
+  --vneg-stop-a: var(--vmc-color-teal-600, #009095);
+  --vneg-stop-b: var(--vmc-color-vault-600, #5a35c2);
+  color: #d1d5dc; /* exacto del SVG pressed */
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.22) 0 2px 5px 2px inset, rgba(0,0,0,0.12) 0 1px 3px;
+}
+.pneg:active::after { opacity: 0; }
+.pneg:disabled {
+  background-image: none;
+  background-color: var(--vmc-color-background-disabled, #e1e3e2);
+  color: var(--vmc-color-neutral-700, #99a1af);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  border-color: transparent;
+}
+.pneg:disabled::after { display: none; }
+.pneg:focus-visible {
+  outline: transparent solid 3px;
+  outline-offset: 4px;
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 5px var(--vmc-color-teal-500, #00aeb1),
+    0 8px 16px -4px rgba(0,174,177,0.3);
+}
+
+/* ── outline · "Regístrate" — RECONSTRUIDO desde cero con SVGs de Figma ──
+   Default 1932:10613 · Hover 1934:10627 · Pressed 1935:10631 (215×48, radius full)
+   3 capas Figma por estado: relleno (paint0) + borde 1px gradiente (stroke) + glass white 0.1 (paint2)
+   Borde = STROKE de 1px (sin stroke-width = 1px), NO 2px. Glass presente en TODOS los estados. */
+.poutline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 56px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--vmc-color-orange-600, #ed8936);
+  /* Default: relleno transparente + glass white 0.1 → transparent 55% (paint1) */
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 55%);
+  box-shadow: none;
+  transition:
+    background 0.25s,
+    color 0.25s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+/* Borde = anillo gradiente de 1px (centro 100% transparente, sin doble borde) — mask trick.
+   Default/Hover: naranja diagonal #FF9639 → #EF852E 50% → #BE3D00 (vector ~144deg) */
+.poutline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(144deg, #ff9639 0%, #ef852e 50%, #be3d00 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.25s;
+}
+/* Glow exterior — interacción Concorde (no existe en Figma estático) */
+.poutline::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: linear-gradient(144deg,
+    var(--vmc-color-orange-600, #ed8936),
+    var(--vmc-color-orange-tint, #fff0e2)
+  );
+  filter: blur(16px);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s, filter 0.3s;
+}
+.poutline:hover {
+  /* Hover 1934:10627: relleno white→#FFF0E2 horizontal (paint0) + glass (paint2). Un solo borde 1px */
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(90deg, #ffffff 0%, var(--vmc-color-orange-tint, #fff0e2) 100%);
+  color: var(--vmc-color-orange-600, #ed8936);
+  text-shadow: rgba(0,0,0,0.08) 0 1px 2px;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: rgba(190,61,0,0.18) 0 6px 18px -4px;
+}
+.poutline:hover::after { opacity: 0.35; filter: blur(18px); }
+.poutline:active {
+  /* Pressed 1935:10631: relleno #D46E20→#B73700 (paint0 ~156deg) + glass. Borde oscuro vertical */
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(156deg, #d46e20 0%, #b73700 100%);
+  color: var(--vmc-color-base-white, #fff);
+  text-shadow: rgba(0,0,0,0.22) 0 1px 2px;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.16) 0 1px 3px;
+}
+/* Pressed: anillo oscuro #B25614 → #93420A VERTICAL (paint1 vector 180deg) */
+.poutline:active::before { background: linear-gradient(180deg, #b25614 0%, #93420a 100%); }
+.poutline:active::after { opacity: 0; }
+.poutline:disabled {
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 55%);
+  color: rgba(237,137,54,0.4);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.poutline:disabled::before { background: rgba(237,137,54,0.3); }
+.poutline:disabled::after { opacity: 0; }
+.poutline:focus-visible {
+  outline: transparent solid 3px;
+  outline-offset: 4px;
+  transform: scale(0.98);
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 5px var(--vmc-color-orange-600, #ed8936);
+}
+
+/* ── secondary-sm · "Agenda tu visita" ──────────────────────────────────
+   Sync EXACTO del SVG export de Figma (Variant=Secondary, Size=Small)
+   Nodos 1442:10976 / 1464:19933 / 1464:20511 · 160×40 fijo · ícono calendario
+   Spec: .claude/concorde/inbox/figma-ButtonGhost-SecondarySm-svg-export.json */
+.psec-sm {
+  --vss-stop-a: var(--vmc-color-vault-500, #8460e5);
+  --vss-stop-b: var(--vmc-color-vault-700, #3b1782);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  min-width: 160px;
+  padding: 0 12px 0 4px;
+  border-radius: var(--vmc-radius-full, 9999px);
+  /* Borde GRADIENTE lila de Figma (constante en los 3 estados) */
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--vmc-font-display, "Plus Jakarta Sans", sans-serif);
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--vmc-color-base-white, #ffffff);
+  text-shadow: rgba(0,0,0,0.25) 0 1px 3px;
+  background-image:
+    linear-gradient(var(--vss-angle), var(--vss-stop-a) 0%, var(--vss-stop-b) 100%),
+    linear-gradient(135deg, #cfbaff 0%, #ffffff 35%, #ae8eff 65%, #cfbaff 100%);
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: rgba(255,255,255,0.22) 0 1px 0 2px inset, rgba(132,96,229,0.3) 0 2px 8px;
+  transition:
+    --vss-angle 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    --vss-stop-a 0.35s,
+    --vss-stop-b 0.35s,
+    transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s;
+  transform: translateZ(0);
+}
+.psec-sm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vmc-radius-full, 9999px);
+  background: linear-gradient(rgba(255,255,255,0.16) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.psec-sm:hover {
+  --vss-angle: 219deg;
+  --vss-stop-a: var(--vmc-color-vault-400, #ae8eff);
+  --vss-stop-b: var(--vmc-color-vault-600, #5a35c2);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: rgba(255,255,255,0.2) 0 1px 0 2px inset, rgba(132,96,229,0.25) 0 4px 10px, rgba(132,96,229,0.4) 0 8px 24px;
+}
+.psec-sm:active {
+  --vss-angle: 160deg;
+  --vss-stop-a: var(--vmc-color-vault-700, #3b1782);
+  --vss-stop-b: var(--vmc-color-vault-900, #22005c);
+  color: #d1d5dc;
+  transform: scale(0.97) translateY(1px);
+  box-shadow: rgba(0,0,0,0.28) 0 2px 5px 2px inset, rgba(0,0,0,0.14) 0 1px 3px;
+}
+.psec-sm:disabled {
+  background-image: none;
+  background-color: var(--vmc-color-background-disabled, #e1e3e2);
+  color: var(--vmc-color-neutral-700, #99a1af);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  border-color: transparent;
+}
+.psec-sm:focus-visible {
+  outline: transparent solid 2px;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 2px var(--vmc-color-base-white, #fff),
+    0 0 0 4px var(--vmc-color-vault-500, #8460e5);
+}
+.psec-sm-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── prefers-reduced-motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pvbtn, .psec, .psec-sm, .pneg, .pghost, .poutline, .pvbtn-sm, .pvbtn-auth-d {
+    transition: none;
+  }
+  .pvbtn::after, .psec::after, .pneg::after, .pghost::after, .poutline::after {
+    transition: none;
+  }
+}
+</style><button class="pvbtn-sm va-qa__simulate" type="button">Simular valorización</button><style>
+.va-qa { box-sizing: border-box; display: grid; gap: 12px; width: 300px; max-width: 100%; padding: 16px; border-radius: 16px; background: #fff; box-shadow: rgba(0,0,0,0.07) 0 0 16px 4px; color: #3B1782; font-family: var(--vmc-font-display, sans-serif); }
+.va-qa h2 { margin: 0; font-size: 14px; }
+.va-qa__opts { display: grid; gap: 6px; }
+.va-qa__opts > span { font-size: 12.5px; font-weight: 700; }
+.va-qa__chip { width: max-content; padding: 6px 10px; border: 1px solid #3B1782; border-radius: 999px; background: #EFEBFB; color: #3B1782; font-size: 13px; font-weight: 600; }
+.va-qa__simulate { justify-self: center; margin-top: 2px; }
+</style></section><div style="flex-basis:100%;height:0" aria-hidden="true"></div><section class="solo-rules" aria-labelledby="publication-rules"><h2 id="publication-rules">Reglas de publicación AVT</h2><p class="solo-rules__intro">Horario y reglas del script · zona horaria: America/Lima</p><div class="solo-rules__schedule"><article class="solo-rules__time"><b>Horario diurno</b><span>08:00:00–23:59:59</span><span class="solo-rules__loop"><em>↻ LOOP</em>3 → 2 → 5 → 4 → 7 → 12 min</span><span>El loop inicia nuevamente a las 08:00.</span></article><article class="solo-rules__time"><b>Horario nocturno</b><span>00:00:00–07:59:59</span><span class="solo-rules__loop"><em>↻ LOOP</em>34 → 21 min</span><span>El loop inicia nuevamente a las 00:00.</span></article></div><h3>Qué debe decidir el script</h3><ol class="solo-rules__list"><li>Publicar solo valorizaciones activas de AVT con <b>año 2020 o superior</b>, marca, modelo, precio, moneda y fecha de cálculo válidos.</li><li>El feed mockea actividad de usuarios: <b>“Un usuario acaba de valorizar un [marca + modelo + año]”</b>, usando el valor referencial que entrega AVT.</li><li>La unicidad diaria es <b>marca + modelo</b>. El año no cuenta: si salió Toyota Yaris 2021, no puede salir otro Toyota Yaris ese día.</li><li>La lista de marca + modelo usados se limpia a las <b>00:00:00</b>. El horario no depende del inventario y nunca se repite un modelo solo para llenar un espacio.</li><li>Si el servicio se detiene, no publica una ráfaga de pendientes: omite los horarios vencidos y continúa con el siguiente horario futuro.</li></ol><h3>Grupos de modelos</h3><table class="solo-rules__groups"><thead><tr><th>Grupo</th><th>Días permitidos</th></tr></thead><tbody><tr><td>A</td><td>Lunes y jueves</td></tr><tr><td>B</td><td>Martes y sábado</td></tr><tr><td>C</td><td>Miércoles y domingo</td></tr><tr><td>D</td><td>Viernes</td></tr></tbody></table><ol class="solo-rules__list" style="margin-top:12px" start="6"><li>Cada marca + modelo pertenece a un único grupo. Puede aparecer en ambos días de su grupo, pero nunca dos veces en el mismo día.</li></ol><h3>Filtro de marcas</h3><ol class="solo-rules__list" start="7"><li>Se permiten marcas regulares. El máximo nivel premium permitido es <b>Lexus, Audi, BMW y Ford</b>.</li><li>Se excluyen marcas de alto lujo: <b>Aston Martin, Bentley, Bugatti, Ferrari, Lamborghini, Maserati, Maybach, McLaren, Porsche y Rolls-Royce</b>.</li></ol><p class="solo-rules__luxury">Las marcas premium no aprobadas expresamente quedan fuera hasta una nueva decisión de negocio.</p><style>
+.solo-rules { box-sizing: border-box; width: min(760px, 100%); padding: 24px; border-radius: 18px; background: #fff; box-shadow: rgba(45, 31, 92, 0.1) 0 8px 28px; color: #24203a; font-family: var(--vmc-font-display, sans-serif); }
+.solo-rules h2 { margin: 0; color: #3B1782; font-size: 20px; }
+.solo-rules__intro { margin: 5px 0 20px; color: #6B6880; font-size: 13px; }
+.solo-rules__schedule { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.solo-rules__time { padding: 16px; border: 1px solid #E5DFFC; border-radius: 14px; background: #FAF9FE; }
+.solo-rules__time b { display: block; color: #3B1782; font-size: 14px; }
+.solo-rules__time span { display: block; margin-top: 4px; color: #6B6880; font-size: 12px; }
+.solo-rules__loop { margin-top: 10px; color: #191C1C !important; font-size: 14px !important; font-weight: 700; letter-spacing: 0.01em; }
+.solo-rules__loop em { display: inline-block; margin-right: 7px; padding: 2px 6px; border-radius: 999px; background: #EDE8FC; color: #3B1782; font-size: 10px; font-style: normal; letter-spacing: 0.04em; vertical-align: 1px; }
+.solo-rules h3 { margin: 24px 0 10px; color: #3B1782; font-size: 15px; }
+.solo-rules__list { display: grid; gap: 9px; margin: 0; padding-left: 20px; color: #4A4560; font-size: 13px; line-height: 1.45; }
+.solo-rules__list b { color: #191C1C; }
+.solo-rules__groups { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 12.5px; }
+.solo-rules__groups th, .solo-rules__groups td { padding: 8px 10px; border-bottom: 1px solid #EAE5F8; text-align: left; }
+.solo-rules__groups th { color: #3B1782; font-weight: 700; }
+.solo-rules__luxury { margin: 10px 0 0; padding: 12px; border-radius: 10px; background: #FFF7ED; color: #70410E; font-size: 12.5px; line-height: 1.45; }
+@media (max-width: 560px) { .solo-rules { padding: 18px; } .solo-rules__schedule { grid-template-columns: 1fr; } }
+</style></section></main><!--$--><!--/$--></div><script src="/_next/static/chunks/webpack-a02576fff1a433cd.js" id="_R_" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0])</script><script>self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[9630,[],\"\"]\n3:I[1380,[],\"\"]\n6:\"static/chunks/270-62666d393c98200e.js\"\n7:\"static/chunks/app/solo/page-d46eb0bd7c031817.js\"\n8:I[6270,[\"270\",\"$6\",\"768\",\"$7\"],\"default\"]\n9:I[6270,[\"270\",\"$6\",\"768\",\"$7\"],\"VmcAhoraQa\"]\n13:\"ViewportBoundary\"\n14:I[887,[],\"$13\"]\n16:\"MetadataBoundary\"\n17:I[887,[],\"$16\"]\n18:\"$Sreact.suspense\"\n1a:I[5718,[],\"default\",1]\n:HL[\"/_next/static/css/09ddcb5dc1daf69c.css\",\"style\"]\n:HL[\"/_next/static/css/ce7136fd51b69ab2.css\",\"style\"]\n5:[[\"children\",{\"s\":\"__PAGE__\",\"h\":512,\"d\":{\"r\":[\"$\",\"$1\",\"c\",{\"children\":[[\"$\",\"main\",null,{\"style\":{\"boxSizing\":\"border-box\",\"minHeight\":\"100vh\",\"display\":\"flex\",\"flexWrap\":\"wrap\",\"justifyContent\":\"center\",\"alignItems\":\"flex-start\",\"gap\":24,\"padding\":\"40px 16px\",\"background\":\"#F4F2FA\"},\"children\":[[\"$\",\"div\",null,{\"style\":{\"display\":\"flex\",\"width\":300,\"maxWidth\":\"100%\",\"height\":560},\"children\":[\"$\",\"$L8\",null,{\"view\":\"timeline\"}]}],[\"$\",\"$L9\",null,{}],[\"$\",\"div\",null,{\"style\":{\"flexBasis\":\"100%\",\"height\":0},\"aria-hidden\":true}],[\"$\",\"section\",null,{\"className\":\"solo-rules\",\"aria-labelledby\":\"publication-rules\",\"children\":[[\"$\",\"h2\",null,{\"id\":\"publication-rules\",\"children\":\"Reglas de publicación AVT\"}],[\"$\",\"p\",null,{\"className\":\"solo-rules__intro\",\"children\":\"Horario y reglas del script · zona horaria: America/Lima\"}],[\"$\",\"div\",null,{\"className\":\"solo-rules__schedule\",\"children\":[[\"$\",\"article\",null,{\"className\":\"solo-rules__time\",\"children\":[[\"$\",\"b\",null,{\"children\":\"Horario diurno\"}],[\"$\",\"span\",null,{\"children\":\"08:00:00–23:59:59\"}],[\"$\",\"span\",null,{\"className\":\"solo-rules__loop\",\"children\":[[\"$\",\"em\",null,{\"children\":\"↻ LOOP\"}],\"3 → 2 → 5 → 4 → 7 → 12 min\"]}],[\"$\",\"span\",null,{\"children\":\"El loop inicia nuevamente a las 08:00.\"}]]}],[\"$\",\"article\",null,{\"className\":\"solo-rules__time\",\"children\":[[\"$\",\"b\",null,{\"children\":\"Horario nocturno\"}],[\"$\",\"span\",null,{\"children\":\"00:00:00–07:59:59\"}],[\"$\",\"span\",null,{\"className\":\"solo-rules__loop\",\"children\":[[\"$\",\"em\",null,{\"children\":\"↻ LOOP\"}],\"34 → 21 min\"]}],[\"$\",\"span\",null,{\"children\":\"El loop inicia nuevamente a las 00:00.\"}]]}]]}],[\"$\",\"h3\",null,{\"children\":\"Qué debe decidir el script\"}],[\"$\",\"ol\",null,{\"className\":\"solo-rules__list\",\"children\":[[\"$\",\"li\",null,{\"children\":[\"Publicar solo valorizaciones activas de AVT con \",[\"$\",\"b\",null,{\"children\":\"año 2020 o superior\"}],\", marca, modelo, precio, moneda y fecha de cálculo válidos.\"]}],[\"$\",\"li\",null,{\"children\":[\"El feed mockea actividad de usuarios: \",[\"$\",\"b\",null,{\"children\":\"“Un usuario acaba de valorizar un [marca + modelo + año]”\"}],\", usando el valor referencial que entrega AVT.\"]}],[\"$\",\"li\",null,{\"children\":[\"La unicidad diaria es \",[\"$\",\"b\",null,{\"children\":\"marca + modelo\"}],\". El año no cuenta: si salió Toyota Yaris 2021, no puede salir otro Toyota Yaris ese día.\"]}],[\"$\",\"li\",null,{\"children\":[\"La lista de marca + modelo usados se limpia a las \",[\"$\",\"b\",null,{\"children\":\"00:00:00\"}],\". El horario no depende del inventario y nunca se repite un modelo solo para llenar un espacio.\"]}],\"$La\"]}],\"$Lb\",\"$Lc\",\"$Ld\",\"$Le\",\"$Lf\",\"$L10\",\"$L11\"]}]]}],null,\"$L12\"]}],\"p\":false,\"v\":null}}]]\n4:[[\"children\",{\"s\":\"solo\",\"h\":512,\"d\":{\"r\":[\"$\",\"$1\",\"c\",{\"children\":[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/ce7136fd51b69ab2.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]],[\"$\",\"div\",null,{\"className\":\"__variable_532bb9\",\"children\":[\"$\",\"$L2\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L3\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]}]]}],\"p\":false,\"v\":null},\"c\":\"$Q5\"}]]\n0:{\"P\":null,\"c\":[\"\",\"solo\"],\"q\":\"\",\"i\":false,\"t\":{\"t\":{\"s\":\"\",\"h\":528,\"d\":{\"r\":[\"$\",\"$1\",\"c\",{\"children\":[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/09ddcb5dc1daf69c.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"es\",\"children\":[\"$\",\"body\",null,{\"children\":[\"$\",\"$L2\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L3\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[[\"$\",\"title\",null,{\"children\":\"404: This page could not be found.\"}],[\"$\",\"div\",null,{\"style\":{\"fontFamily\":\"system-ui,\\\"Segoe UI\\\",Roboto,Helvetica,Arial,sans-serif,\\\"Apple Color Emoji\\\",\\\"Segoe UI Emoji\\\"\",\"height\":\"100vh\",\"textAlign\":\"center\",\"display\":\"flex\",\"flexDirection\":\"column\",\"alignItems\":\"center\",\"justifyContent\":\"center\"},\"children\":[\"$\",\"div\",null,{\"children\":[[\"$\",\"style\",null,{\"dangerouslySetInnerHTML\":{\"__html\":\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\"}}],[\"$\",\"h1\",null,{\"className\":\"next-error-h1\",\"style\":{\"display\":\"inline-block\",\"margin\":\"0 20px 0 0\",\"padding\":\"0 23px 0 0\",\"fontSize\":24,\"fontWeight\":500,\"verticalAlign\":\"top\",\"lineHeight\":\"49px\"},\"children\":404}],[\"$\",\"div\",null,{\"style\":{\"display\":\"inline-block\"},\"children\":[\"$\",\"h2\",null,{\"style\":{\"fontSize\":14,\"fontWeight\":400,\"lineHeight\":\"49px\",\"margin\":0},\"children\":\"This page could not be found.\"}]}]]}]}]],[]],\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]}]}]]}],\"p\":false,\"v\":null},\"c\":\"$Q4\"},\"h\":{\"r\":[\"$\",\"$1\",\"h\",{\"children\":[null,[\"$\",\"$L14\",null,{\"children\":\"$L15\"}],[\"$\",\"$L17\",null,{\"children\":[[\"$\",\"div\",null,{\"hidden\":true,\"children\":[\"$\",\"$18\",null,{\"name\":\"Next.Metadata\",\"children\":\"$L19\"}]}],null]}],null]}],\"p\":false,\"v\":null}},\"m\":\"$undefined\",\"G\":[\"$1a\",[]],\"S\":true,\"r\":\"$undefined\",\"s\":\"$undefined\",\"a\":\"$undefined\",\"l\":\"$undefined\",\"p\":\"$undefined\",\"d\":\"$undefined\",\"b\":\"lmgaH9n19Wt6U2HDgJSRe\"}\n1c:I[887,[],\"OutletBoundary\"]\na:[\"$\",\"li\",null,{\"children\":\"Si el servicio se detiene, no publica una ráfaga de pendientes: omite los horarios vencidos y continúa con el siguiente horario futuro.\"}]\nb:[\"$\",\"h3\",null,{\"children\":\"Grupos de modelos\"}]\nc:[\"$\",\"table\",null,{\"className\":\"solo-rules__groups\",\"children\":[[\"$\",\"thead\",null,{\"children\":[\"$\",\"tr\",null,{\"children\":[[\"$\",\"th\",null,{\"children\":\"Grupo\"}],[\"$\",\"th\",null,{\"children\":\"Días permitidos\"}]]}]}],[\"$\",\"tbody\",null,{\"children\":[[\"$\",\"tr\",null,{\"children\":[[\"$\",\"td\",null,{\"children\":\"A\"}],[\"$\",\"td\",null,{\"children\":\"Lunes y jueves\"}]]}],[\"$\",\"tr\",null,{\"children\":[[\"$\",\"td\",null,{\"children\":\"B\"}],[\"$\",\"td\",null,{\"children\":\"Martes y sábado\"}]]}],[\"$\",\"tr\",null,{\"children\":[[\"$\",\"td\",null,{\"children\":\"C\"}],[\"$\",\"td\",null,{\"children\":\"Miércoles y domingo\"}]]}],[\"$\",\"tr\",null,{\"children\":[[\"$\",\"td\",null,{\"children\":\"D\"}],[\"$\",\"td\",null,{\"children\":\"Viernes\"}]]}]]}]]}]\nd:[\"$\",\"ol\",null,{\"className\":\"solo-rules__list\",\"style\":{\"marginTop\":12},\"start\":6,\"children\":[\"$\",\"li\",null,{\"children\":\"Cada marca + modelo pertenece a un único grupo. Puede aparecer en ambos días de su grupo, pero nunca dos veces en el mismo día.\"}]}]\ne:[\"$\",\"h3\",null,{\"children\":\"Filtro de marcas\"}]\nf:[\"$\",\"ol\",null,{\"className\":\"solo-rules__list\",\"start\":7,\"children\":[[\"$\",\"li\",null,{\"children\":[\"Se permiten marcas regulares. El máximo nivel premium permitido es \",[\"$\",\"b\",null,{\"children\":\"Lexus, Audi, BMW y Ford\"}],\".\"]}],[\"$\",\"li\",null,{\"children\":[\"Se excluyen marcas de alto lujo: \",[\"$\",\"b\",null,{\"children\":\"Aston Martin, Bentley, Bugatti, Ferrari, Lamborghini, Maserati, Maybach, McLaren, Porsche y Rolls-Royce\"}],\".\"]}]]}]\n10:[\"$\",\"p\",null,{\"className\":\"solo-rules__luxury\",\"children\":\"Las marcas premium no aprobadas expresamente quedan fuera hasta una nueva decisión de negocio.\"}]\n1b:T76f,\n.solo-rules { box-sizing: border-box; width: min(760px, 100%); padding: 24px; border-radius: 18px; background: #fff; box-shadow: rgba(45, 31, 92, 0.1) 0 8px 28px; color: #24203a; font-family: var(--vmc-font-display, sans-serif); }\n.solo-rules h2 { margin: 0; color: #3B1782; font-size: 20px; }\n.solo-rules__intro { margin: 5px 0 20px; color: #6B6880; font-size: 13px; }\n.solo-rules__schedule { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }\n.solo-rules__time { padding: 16px; border: 1px solid #E5DFFC; border-radius: 14px; background: #FAF9FE; }\n.solo-rules__time b { display: block; color: #3B1782; font-size: 14px; }\n.solo-rules__time span { display: block; margin-top: 4px; color: #6B6880; font-size: 12px; }\n.solo-rules__loop { margin-top: 10px; color: #191C1C !important; font-size: 14px !important; font-weight: 700; letter-spacing: 0.01em; }\n.solo-rules__loop em { display: inline-block; margin-right: 7px; padding: 2px 6px; border-radius: 999px; background: #EDE8FC; color: #3B1782; font-size: 10px; font-style: normal; letter-spacing: 0.04em; vertical-align: 1px; }\n.solo-rules h3 { margin: 24px 0 10px; color: #3B1782; font-size: 15px; }\n.solo-rules__list { display: grid; gap: 9px; margin: 0; padding-left: 20px; color: #4A4560; font-size: 13px; line-height: 1.45; }\n.solo-rules__list b { color: #191C1C; }\n.solo-rules__groups { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 12.5px; }\n.solo-rules__groups th, .solo-rules__groups td { padding: 8px 10px; border-bottom: 1px solid #EAE5F8; text-align: left; }\n.solo-rules__groups th { color: #3B1782; font-weight: 700; }\n.solo-rules__luxury { margin: 10px 0 0; padding: 12px; border-radius: 10px; background: #FFF7ED; color: #70410E; font-size: 12.5px; line-height: 1.45; }\n@media (max-width: 560px) { .solo-rules { padding: 18px; } .solo-rules__schedule { grid-template-columns: 1fr; } }\n11:[\"$\",\"style\",null,{\"children\":\"$1b\"}]\n12:[\"$\",\"$L1c\",null,{\"children\":[\"$\",\"$18\",null,{\"name\":\"Next.MetadataOutlet\",\"children\":\"$@1d\"}]}]\n15:[[\"$\",\"meta\",\"0\",{\"charSet\":\"utf-8\"}],[\"$\",\"meta\",\"1\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}]]\n1e:I[214,[],\"IconMark\"]\n19:[[\"$\",\"title\",\"0\",{\"children\":\"VMC ahora\"}],[\"$\",\"meta\",\"1\",{\"name\":\"description\",\"content\":\"Feed de novedades de VMC.\"}],[\"$\",\"link\",\"2\",{\"rel\":\"icon\",\"href\":\"/icon.svg?d9d4043a4fcf9008\",\"type\":\"image/svg+xml\",\"sizes\":\"any\"}],[\"$\",\"$L1e\",\"3\",{}]]\n1d:null\n"])</script></body></html>
